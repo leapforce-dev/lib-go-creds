@@ -14,13 +14,13 @@ const (
 
 type Service struct {
 	domain      string
-	code        string
+	apiKey      string
 	httpService *go_http.Service
 }
 
 type ServiceConfig struct {
 	Domain string
-	Code   string
+	APIKey string
 }
 
 func NewService(serviceConfig *ServiceConfig) (*Service, *errortools.Error) {
@@ -32,8 +32,8 @@ func NewService(serviceConfig *ServiceConfig) (*Service, *errortools.Error) {
 		return nil, errortools.ErrorMessage("Domain not provided")
 	}
 
-	if serviceConfig.Code == "" {
-		return nil, errortools.ErrorMessage("Code not provided")
+	if serviceConfig.APIKey == "" {
+		return nil, errortools.ErrorMessage("APIKey not provided")
 	}
 
 	httpService, e := go_http.NewService(&go_http.ServiceConfig{})
@@ -43,14 +43,14 @@ func NewService(serviceConfig *ServiceConfig) (*Service, *errortools.Error) {
 
 	return &Service{
 		domain:      serviceConfig.Domain,
-		code:        serviceConfig.Code,
+		apiKey:      serviceConfig.APIKey,
 		httpService: httpService,
 	}, nil
 }
 
 func (service *Service) httpRequest(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
 	header := http.Header{}
-	header.Set("X-Check-Code", service.code)
+	header.Set("X-Api-Key", service.apiKey)
 	requestConfig.NonDefaultHeaders = &header
 
 	return service.httpService.HTTPRequest(requestConfig)

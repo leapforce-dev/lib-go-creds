@@ -11,14 +11,23 @@ import (
 	go_http "github.com/leapforce-libraries/go_http"
 )
 
+const (
+	HistoricDataStateNone    string = "None"
+	HistoricDataStateStart   string = "Start"
+	HistoricDataStateRunning string = "Running..."
+	HistoricDataStateDone    string = "Done"
+
+	StateActive          string = "Active"
+	CustomFieldGuidState string = "c6986444-5147-4f25-97e8-6857aa4a3189"
+)
+
 type SoftwareClientLicense struct {
-	SoftwareClientLicenseGuid  string
-	ObjectID                   string
-	ObjectName                 string
-	SoftwareClientLicenseState string
-	DataState                  string
-	AsOf                       civil.Date
-	Values                     map[string]string
+	CompanyID                 int64
+	CompanyName               string
+	SoftwareClientLicenseGuid string
+	dataState                 string
+	AsOf                      civil.Date
+	Values                    map[string]string
 }
 
 type GetSoftwareClientLicensesConfig struct {
@@ -30,9 +39,9 @@ type GetSoftwareClientLicensesConfig struct {
 
 func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicensesConfig) (*[]SoftwareClientLicense, *errortools.Error) {
 	_softwareClientLicenses := []struct {
+		CompanyID                  int64
+		CompanyName                string
 		SoftwareClientLicenseGuid  string
-		ObjectID                   string
-		ObjectName                 string
 		SoftwareClientLicenseState string
 		DataState                  string
 		AsOf                       *civil.Date
@@ -57,13 +66,13 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 	}
 
 	var values url.Values = url.Values{}
-	values.Set("pkg", config.SoftwarePackageGuid)
+	values.Set("software_package_guid", config.SoftwarePackageGuid)
 
 	if config.CompanyID != nil {
-		values.Set("obj", fmt.Sprintf("%v", *config.CompanyID))
+		values.Set("caompany_id", fmt.Sprintf("%v", *config.CompanyID))
 	}
 	if config.SoftwareClientLicenseGuid != nil {
-		values.Set("swr", *config.SoftwareClientLicenseGuid)
+		values.Set("software_client_licence_guid", *config.SoftwareClientLicenseGuid)
 	}
 
 	requestConfig := go_http.RequestConfig{
@@ -80,13 +89,13 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 	softwareClientLicenses := []SoftwareClientLicense{}
 
 	for _, _softwareClientLicense := range _softwareClientLicenses {
-		if _softwareClientLicense.SoftwareClientLicenseState != "Active" {
-			fmt.Printf("%s skipped (not active)\n", _softwareClientLicense.ObjectName)
+		if _softwareClientLicense.SoftwareClientLicenseState != StateActive {
+			fmt.Printf("%s skipped (not active)\n", _softwareClientLicense.CompanyName)
 			continue
 		}
 
 		if _softwareClientLicense.AsOf == nil {
-			fmt.Printf("%s skipped (no as of date)\n", _softwareClientLicense.ObjectName)
+			fmt.Printf("%s skipped (no as of date)\n", _softwareClientLicense.CompanyName)
 			continue
 		}
 
@@ -123,21 +132,85 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 			}
 
 			if len(missingKeys) > 0 {
-				fmt.Printf("%s skipped (missing keys: %s)\n", _softwareClientLicense.ObjectName, strings.Join(missingKeys, ", "))
+				fmt.Printf("%s skipped (missing keys: %s)\n", _softwareClientLicense.CompanyName, strings.Join(missingKeys, ", "))
 				continue
 			}
 		}
 
 		softwareClientLicenses = append(softwareClientLicenses, SoftwareClientLicense{
-			SoftwareClientLicenseGuid:  _softwareClientLicense.SoftwareClientLicenseGuid,
-			ObjectID:                   _softwareClientLicense.ObjectID,
-			ObjectName:                 _softwareClientLicense.ObjectName,
-			SoftwareClientLicenseState: _softwareClientLicense.SoftwareClientLicenseState,
-			DataState:                  _softwareClientLicense.DataState,
-			AsOf:                       *_softwareClientLicense.AsOf,
-			Values:                     values,
+			CompanyID:                 _softwareClientLicense.CompanyID,
+			CompanyName:               _softwareClientLicense.CompanyName,
+			SoftwareClientLicenseGuid: _softwareClientLicense.SoftwareClientLicenseGuid,
+			dataState:                 _softwareClientLicense.DataState,
+			AsOf:                      *_softwareClientLicense.AsOf,
+			Values:                    values,
 		})
 	}
 
 	return &softwareClientLicenses, nil
+}
+
+func (softwareClientLicense *SoftwareClientLicense) isHistoricDataState(state string, default_ bool) bool {
+	if softwareClientLicense == nil {
+		return default_
+	}
+
+	if softwareClientLicense.dataState == "" {
+		return default_
+	}
+
+	if softwareClientLicense.dataState == state {
+		return true
+	}
+
+	return false
+}
+
+func (softwareClientLicense *SoftwareClientLicense) IsHistoricDataNone() bool {
+	return softwareClientLicense.isHistoricDataState(HistoricDataStateNone, true)
+}
+
+func (softwareClientLicense *SoftwareClientLicense) IsHistoricDataStart() bool {
+	return softwareClientLicense.isHistoricDataState(HistoricDataStateStart, false)
+}
+
+func (softwareClientLicense *SoftwareClientLicense) IsHistoricDataRunning() bool {
+	return softwareClientLicense.isHistoricDataState(HistoricDataStateRunning, false)
+}
+
+func (softwareClientLicense *SoftwareClientLicense) IsHistoricDataDone() bool {
+	return softwareClientLicense.isHistoricDataState(HistoricDataStateDone, false)
+}
+
+func (service *Service) setHistoricDataState(softwareClientLicense *SoftwareClientLicense, state string) *errortools.Error {
+	body := struct {
+		CompanyID                 int64  `json:"company_id"`
+		SoftwareClientLicenseGuid string `json:"software_client_license_guid"`
+		State                     string `json:"state"`
+	}{
+		softwareClientLicense.CompanyID,
+		softwareClientLicense.SoftwareClientLicenseGuid,
+		state,
+	}
+
+	requestConfig := go_http.RequestConfig{
+		Method:    http.MethodPost,
+		URL:       service.url("creds/state"),
+		BodyModel: body,
+	}
+
+	_, _, e := service.httpRequest(&requestConfig)
+	if e != nil {
+		return e
+	}
+
+	return nil
+}
+
+func (service *Service) SetHistoricDataRunning(softwareClientLicense *SoftwareClientLicense) *errortools.Error {
+	return service.setHistoricDataState(softwareClientLicense, HistoricDataStateRunning)
+}
+
+func (service *Service) SetHistoricDataDone(softwareClientLicense *SoftwareClientLicense) *errortools.Error {
+	return service.setHistoricDataState(softwareClientLicense, HistoricDataStateDone)
 }
