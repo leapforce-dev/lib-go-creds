@@ -72,7 +72,7 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 		values.Set("company_id", fmt.Sprintf("%v", *config.CompanyId))
 	}
 	if config.SoftwareClientLicenseGuid != nil {
-		values.Set("software_client_licence_guid", *config.SoftwareClientLicenseGuid)
+		values.Set("software_client_license_guid", *config.SoftwareClientLicenseGuid)
 	}
 
 	requestConfig := go_http.RequestConfig{
