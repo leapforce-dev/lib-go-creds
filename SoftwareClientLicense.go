@@ -22,7 +22,7 @@ const (
 )
 
 type SoftwareClientLicense struct {
-	CompanyID                 int64
+	CompanyId                 int64
 	CompanyName               string
 	SoftwareClientLicenseGuid string
 	dataState                 string
@@ -33,13 +33,13 @@ type SoftwareClientLicense struct {
 type GetSoftwareClientLicensesConfig struct {
 	SoftwarePackageGuid       string
 	RequiredKeys              *[]string
-	CompanyID                 *int64
+	CompanyId                 *int64
 	SoftwareClientLicenseGuid *string
 }
 
 func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicensesConfig) (*[]SoftwareClientLicense, *errortools.Error) {
 	_softwareClientLicenses := []struct {
-		CompanyID                  int64
+		CompanyId                  int64
 		CompanyName                string
 		SoftwareClientLicenseGuid  string
 		SoftwareClientLicenseState string
@@ -68,8 +68,8 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 	var values url.Values = url.Values{}
 	values.Set("software_package_guid", config.SoftwarePackageGuid)
 
-	if config.CompanyID != nil {
-		values.Set("caompany_id", fmt.Sprintf("%v", *config.CompanyID))
+	if config.CompanyId != nil {
+		values.Set("company_id", fmt.Sprintf("%v", *config.CompanyId))
 	}
 	if config.SoftwareClientLicenseGuid != nil {
 		values.Set("software_client_licence_guid", *config.SoftwareClientLicenseGuid)
@@ -138,7 +138,7 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 		}
 
 		softwareClientLicenses = append(softwareClientLicenses, SoftwareClientLicense{
-			CompanyID:                 _softwareClientLicense.CompanyID,
+			CompanyId:                 _softwareClientLicense.CompanyId,
 			CompanyName:               _softwareClientLicense.CompanyName,
 			SoftwareClientLicenseGuid: _softwareClientLicense.SoftwareClientLicenseGuid,
 			dataState:                 _softwareClientLicense.DataState,
@@ -184,11 +184,11 @@ func (softwareClientLicense *SoftwareClientLicense) IsHistoricDataDone() bool {
 
 func (service *Service) setHistoricDataState(softwareClientLicense *SoftwareClientLicense, state string) *errortools.Error {
 	body := struct {
-		CompanyID                 int64  `json:"company_id"`
+		CompanyId                 int64  `json:"company_id"`
 		SoftwareClientLicenseGuid string `json:"software_client_license_guid"`
 		State                     string `json:"state"`
 	}{
-		softwareClientLicense.CompanyID,
+		softwareClientLicense.CompanyId,
 		softwareClientLicense.SoftwareClientLicenseGuid,
 		state,
 	}

@@ -20,7 +20,7 @@ type Service struct {
 
 type ServiceConfig struct {
 	Domain string
-	APIKey string
+	ApiKey string
 }
 
 func NewService(serviceConfig *ServiceConfig) (*Service, *errortools.Error) {
@@ -32,8 +32,8 @@ func NewService(serviceConfig *ServiceConfig) (*Service, *errortools.Error) {
 		return nil, errortools.ErrorMessage("Domain not provided")
 	}
 
-	if serviceConfig.APIKey == "" {
-		return nil, errortools.ErrorMessage("APIKey not provided")
+	if serviceConfig.ApiKey == "" {
+		return nil, errortools.ErrorMessage("ApiKey not provided")
 	}
 
 	httpService, e := go_http.NewService(&go_http.ServiceConfig{})
@@ -43,7 +43,7 @@ func NewService(serviceConfig *ServiceConfig) (*Service, *errortools.Error) {
 
 	return &Service{
 		domain:      serviceConfig.Domain,
-		apiKey:      serviceConfig.APIKey,
+		apiKey:      serviceConfig.ApiKey,
 		httpService: httpService,
 	}, nil
 }
@@ -60,18 +60,18 @@ func (service *Service) url(path string) string {
 	return fmt.Sprintf("%s/%s", service.domain, path)
 }
 
-func (service *Service) APIName() string {
+func (service *Service) ApiName() string {
 	return apiName
 }
 
-func (service *Service) APIKey() string {
+func (service *Service) ApiKey() string {
 	return ""
 }
 
-func (service *Service) APICallCount() int64 {
+func (service *Service) ApiCallCount() int64 {
 	return service.httpService.RequestCount()
 }
 
-func (service *Service) APIReset() {
+func (service *Service) ApiReset() {
 	service.httpService.ResetRequestCount()
 }
