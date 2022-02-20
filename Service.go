@@ -53,7 +53,7 @@ func (service *Service) httpRequest(requestConfig *go_http.RequestConfig) (*http
 	header.Set("X-Api-Key", service.apiKey)
 	requestConfig.NonDefaultHeaders = &header
 
-	return service.httpService.HTTPRequest(requestConfig)
+	return service.httpService.HttpRequest(requestConfig)
 }
 
 func (service *Service) url(path string) string {

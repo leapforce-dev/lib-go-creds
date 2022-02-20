@@ -77,7 +77,7 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 
 	requestConfig := go_http.RequestConfig{
 		Method:        http.MethodGet,
-		URL:           service.url(fmt.Sprintf("creds?%s", values.Encode())),
+		Url:           service.url(fmt.Sprintf("creds?%s", values.Encode())),
 		ResponseModel: &_softwareClientLicenses,
 	}
 
@@ -195,7 +195,7 @@ func (service *Service) setHistoricDataState(softwareClientLicense *SoftwareClie
 
 	requestConfig := go_http.RequestConfig{
 		Method:    http.MethodPost,
-		URL:       service.url("creds/state"),
+		Url:       service.url("creds/state"),
 		BodyModel: body,
 	}
 
