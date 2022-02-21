@@ -99,10 +99,10 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 			continue
 		}
 
-		if _softwareClientLicense.AsOf == nil {
+		/*if _softwareClientLicense.AsOf == nil {
 			fmt.Printf("%s skipped (no as of date)\n", _softwareClientLicense.CompanyName)
 			continue
-		}
+		}*/
 
 		values := make(map[string]string)
 		if strings.Trim(_softwareClientLicense.Key1, " ") != "" {
