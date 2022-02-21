@@ -31,7 +31,7 @@ type SoftwareClientLicense struct {
 	CompanyName               string
 	SoftwareClientLicenseGuid string
 	dataState                 string
-	AsOf                      civil.Date
+	AsOf                      *civil.Date
 	Values                    map[string]string
 }
 
@@ -147,7 +147,7 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 			CompanyName:               _softwareClientLicense.CompanyName,
 			SoftwareClientLicenseGuid: _softwareClientLicense.SoftwareClientLicenseGuid,
 			dataState:                 _softwareClientLicense.DataState,
-			AsOf:                      *_softwareClientLicense.AsOf,
+			AsOf:                      _softwareClientLicense.AsOf,
 			Values:                    values,
 		})
 	}
