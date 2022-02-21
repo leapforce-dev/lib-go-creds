@@ -11,11 +11,16 @@ import (
 	go_http "github.com/leapforce-libraries/go_http"
 )
 
+type HistoricDataState string
+
 const (
-	HistoricDataStateNone    string = "None"
-	HistoricDataStateStart   string = "Start"
-	HistoricDataStateRunning string = "Running..."
-	HistoricDataStateDone    string = "Done"
+	HistoricDataStateNone     HistoricDataState = "None"
+	HistoricDataStateStart    HistoricDataState = "Start"
+	HistoricDataStateRunning  HistoricDataState = "Running..."
+	HistoricDataStateDone     HistoricDataState = "Done"
+	HistoricDataStateDelete   HistoricDataState = "Delete"
+	HistoricDataStateDeleting HistoricDataState = "Deleting..."
+	HistoricDataStateDeleted  HistoricDataState = "Deleted"
 
 	StateActive          string = "Active"
 	CustomFieldGuidState string = "c6986444-5147-4f25-97e8-6857aa4a3189"
@@ -150,7 +155,11 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 	return &softwareClientLicenses, nil
 }
 
-func (softwareClientLicense *SoftwareClientLicense) isHistoricDataState(state string, default_ bool) bool {
+func (softwareClientLicense *SoftwareClientLicense) DataState() string {
+	return softwareClientLicense.dataState
+}
+
+func (softwareClientLicense *SoftwareClientLicense) isHistoricDataState(state HistoricDataState, default_ bool) bool {
 	if softwareClientLicense == nil {
 		return default_
 	}
@@ -159,7 +168,7 @@ func (softwareClientLicense *SoftwareClientLicense) isHistoricDataState(state st
 		return default_
 	}
 
-	if softwareClientLicense.dataState == state {
+	if softwareClientLicense.dataState == string(state) {
 		return true
 	}
 
@@ -182,7 +191,19 @@ func (softwareClientLicense *SoftwareClientLicense) IsHistoricDataDone() bool {
 	return softwareClientLicense.isHistoricDataState(HistoricDataStateDone, false)
 }
 
-func (service *Service) setHistoricDataState(softwareClientLicense *SoftwareClientLicense, state string) *errortools.Error {
+func (softwareClientLicense *SoftwareClientLicense) IsHistoricDataDelete() bool {
+	return softwareClientLicense.isHistoricDataState(HistoricDataStateDelete, false)
+}
+
+func (softwareClientLicense *SoftwareClientLicense) IsHistoricDataDeleting() bool {
+	return softwareClientLicense.isHistoricDataState(HistoricDataStateDeleting, false)
+}
+
+func (softwareClientLicense *SoftwareClientLicense) IsHistoricDataDeleted() bool {
+	return softwareClientLicense.isHistoricDataState(HistoricDataStateDeleted, false)
+}
+
+func (service *Service) setHistoricDataState(softwareClientLicense *SoftwareClientLicense, state HistoricDataState) *errortools.Error {
 	body := struct {
 		CompanyId                 int64  `json:"company_id"`
 		SoftwareClientLicenseGuid string `json:"software_client_license_guid"`
@@ -190,7 +211,7 @@ func (service *Service) setHistoricDataState(softwareClientLicense *SoftwareClie
 	}{
 		softwareClientLicense.CompanyId,
 		softwareClientLicense.SoftwareClientLicenseGuid,
-		state,
+		string(state),
 	}
 
 	requestConfig := go_http.RequestConfig{
@@ -213,4 +234,12 @@ func (service *Service) SetHistoricDataRunning(softwareClientLicense *SoftwareCl
 
 func (service *Service) SetHistoricDataDone(softwareClientLicense *SoftwareClientLicense) *errortools.Error {
 	return service.setHistoricDataState(softwareClientLicense, HistoricDataStateDone)
+}
+
+func (service *Service) SetHistoricDataDeleting(softwareClientLicense *SoftwareClientLicense) *errortools.Error {
+	return service.setHistoricDataState(softwareClientLicense, HistoricDataStateDeleting)
+}
+
+func (service *Service) SetHistoricDataDeleted(softwareClientLicense *SoftwareClientLicense) *errortools.Error {
+	return service.setHistoricDataState(softwareClientLicense, HistoricDataStateDeleted)
 }

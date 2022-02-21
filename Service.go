@@ -3,6 +3,7 @@ package creds
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	errortools "github.com/leapforce-libraries/go_errortools"
 	go_http "github.com/leapforce-libraries/go_http"
@@ -57,7 +58,7 @@ func (service *Service) httpRequest(requestConfig *go_http.RequestConfig) (*http
 }
 
 func (service *Service) url(path string) string {
-	return fmt.Sprintf("%s/%s", service.domain, path)
+	return fmt.Sprintf("%s/%s", strings.TrimRight(service.domain, "/"), path)
 }
 
 func (service *Service) ApiName() string {
