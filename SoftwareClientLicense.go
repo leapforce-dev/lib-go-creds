@@ -32,7 +32,7 @@ type SoftwareClientLicense struct {
 	SoftwareClientLicenseGuid string
 	dataState                 string
 	AsOf                      *civil.Date
-	Values                    map[string]string
+	values                    map[string]string
 }
 
 type GetSoftwareClientLicensesConfig struct {
@@ -148,7 +148,7 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 			SoftwareClientLicenseGuid: _softwareClientLicense.SoftwareClientLicenseGuid,
 			dataState:                 _softwareClientLicense.DataState,
 			AsOf:                      _softwareClientLicense.AsOf,
-			Values:                    values,
+			values:                    values,
 		})
 	}
 
@@ -173,6 +173,10 @@ func (softwareClientLicense *SoftwareClientLicense) isHistoricDataState(state Hi
 	}
 
 	return false
+}
+
+func (softwareClientLicense *SoftwareClientLicense) GetValue(key string) string {
+	return softwareClientLicense.values[key]
 }
 
 func (softwareClientLicense *SoftwareClientLicense) IsHistoricDataNone() bool {
