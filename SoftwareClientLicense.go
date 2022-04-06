@@ -30,6 +30,7 @@ type SoftwareClientLicense struct {
 	CompanyId                 int64
 	CompanyName               string
 	SoftwareClientLicenseGuid string
+	state                     string
 	dataState                 string
 	AsOf                      *civil.Date
 	values                    map[string]string
@@ -40,30 +41,31 @@ type GetSoftwareClientLicensesConfig struct {
 	RequiredKeys              *[]string
 	CompanyId                 *int64
 	SoftwareClientLicenseGuid *string
+	IncludeAllStates          *bool
 }
 
 func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicensesConfig) (*[]SoftwareClientLicense, *errortools.Error) {
 	_softwareClientLicenses := []struct {
-		CompanyId                  int64
-		CompanyName                string
-		SoftwareClientLicenseGuid  string
-		SoftwareClientLicenseState string
-		DataState                  string
-		AsOf                       *civil.Date
-		Key1                       string
-		Value1                     string
-		Key2                       string
-		Value2                     string
-		Key3                       string
-		Value3                     string
-		Key4                       string
-		Value4                     string
-		Key5                       string
-		Value5                     string
-		Key6                       string
-		Value6                     string
-		Key7                       string
-		Value7                     string
+		CompanyId                 int64
+		CompanyName               string
+		SoftwareClientLicenseGuid string
+		State                     string
+		DataState                 string
+		AsOf                      *civil.Date
+		Key1                      string
+		Value1                    string
+		Key2                      string
+		Value2                    string
+		Key3                      string
+		Value3                    string
+		Key4                      string
+		Value4                    string
+		Key5                      string
+		Value5                    string
+		Key6                      string
+		Value6                    string
+		Key7                      string
+		Value7                    string
 	}{}
 
 	if config == nil {
@@ -80,6 +82,11 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 		values.Set("software_client_license_guid", *config.SoftwareClientLicenseGuid)
 	}
 
+	includeAllStates := false
+	if *config.IncludeAllStates {
+		includeAllStates = true
+	}
+
 	requestConfig := go_http.RequestConfig{
 		Method:        http.MethodGet,
 		Url:           service.url(fmt.Sprintf("creds?%s", values.Encode())),
@@ -94,9 +101,11 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 	softwareClientLicenses := []SoftwareClientLicense{}
 
 	for _, _softwareClientLicense := range _softwareClientLicenses {
-		if _softwareClientLicense.SoftwareClientLicenseState != StateActive {
-			fmt.Printf("%s skipped (not active)\n", _softwareClientLicense.CompanyName)
-			continue
+		if !includeAllStates {
+			if _softwareClientLicense.State != StateActive {
+				fmt.Printf("%s skipped (not active)\n", _softwareClientLicense.CompanyName)
+				continue
+			}
 		}
 
 		/*if _softwareClientLicense.AsOf == nil {
@@ -146,6 +155,7 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 			CompanyId:                 _softwareClientLicense.CompanyId,
 			CompanyName:               _softwareClientLicense.CompanyName,
 			SoftwareClientLicenseGuid: _softwareClientLicense.SoftwareClientLicenseGuid,
+			state:                     _softwareClientLicense.State,
 			dataState:                 _softwareClientLicense.DataState,
 			AsOf:                      _softwareClientLicense.AsOf,
 			values:                    values,
