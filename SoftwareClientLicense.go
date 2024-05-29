@@ -30,6 +30,7 @@ type SoftwareClientLicense struct {
 	CompanyId                 int64
 	CompanyName               string
 	SoftwareClientLicenseGuid string
+	Description               *string
 	state                     string
 	dataState                 string
 	AsOf                      *civil.Date
@@ -49,6 +50,7 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 		CompanyId                  int64
 		CompanyName                string
 		SoftwareClientLicenseGuid  string
+		Description                *string
 		SoftwareClientLicenseState string
 		DataState                  string
 		AsOf                       *civil.Date
@@ -155,6 +157,7 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 			CompanyId:                 _softwareClientLicense.CompanyId,
 			CompanyName:               _softwareClientLicense.CompanyName,
 			SoftwareClientLicenseGuid: _softwareClientLicense.SoftwareClientLicenseGuid,
+			Description:               _softwareClientLicense.Description,
 			state:                     _softwareClientLicense.SoftwareClientLicenseState,
 			dataState:                 _softwareClientLicense.DataState,
 			AsOf:                      _softwareClientLicense.AsOf,
