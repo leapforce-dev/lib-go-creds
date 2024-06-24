@@ -74,6 +74,8 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 		return nil, errortools.ErrorMessage("Config is required")
 	}
 
+	includeAllStates := false
+
 	var values url.Values = url.Values{}
 	values.Set("software_package_guid", config.SoftwarePackageGuid)
 
@@ -82,9 +84,9 @@ func (service *Service) GetSoftwareClientLicenses(config *GetSoftwareClientLicen
 	}
 	if config.SoftwareClientLicenseGuid != nil {
 		values.Set("software_client_license_guid", *config.SoftwareClientLicenseGuid)
+		includeAllStates = true
 	}
 
-	includeAllStates := false
 	if config.IncludeAllStates != nil {
 		includeAllStates = *config.IncludeAllStates
 	}
